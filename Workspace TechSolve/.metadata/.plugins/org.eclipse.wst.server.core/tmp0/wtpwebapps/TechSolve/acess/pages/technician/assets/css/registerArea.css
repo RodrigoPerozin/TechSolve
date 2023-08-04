@@ -1,0 +1,55 @@
+@charset "UTF-8";
+
+#tableRegister .user-tbody, #tableRegister .client-tbody{
+	padding: 2vw;
+}
+
+h1.registerArea{
+    text-align: center;
+    margin-top: 35vh;
+    font-size: 12vh;
+}
+
+
+#tableRegister{
+	display: flex;
+	justify-content: center;
+	margin-bottom: 30px;
+}
+
+#tableRegister .btn{
+	width:13vw;
+}
+
+#tableRegister tr td{
+	justify-content: center;
+}
+
+#userTable, #clientTable{
+	width: 83vw;
+	display: inline-table;
+	box-shadow: none;
+	margin-bottom: 5.5vh;
+}
+
+#tableUsersdiv, #tableClientsdiv{
+	margin-top: 5.6vh;
+}
+
+#tableUsersdiv td, #tableClientsdiv td, #tableUsersdiv th, #tableClientsdiv th{
+	vertical-align: middle;
+    font-size: 1.3vw;
+}
+
+.btn-tr-user, .btn-tr-user td{
+	width: 100%;
+    display: flex;
+}
+
+.table>:not(caption)>*>*{
+	padding:0;
+}
+
+.mb-3{
+	margin: 0 !important;
+}

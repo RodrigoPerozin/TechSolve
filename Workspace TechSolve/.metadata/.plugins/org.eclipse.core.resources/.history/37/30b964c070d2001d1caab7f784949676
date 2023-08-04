@@ -1,0 +1,622 @@
+package br.com.techsolve.rest;
+
+import javax.ws.rs.Path;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.internal.LinkedTreeMap;
+
+import br.com.techsolve.jdbc.JDBCClientDAO;
+import br.com.techsolve.jdbc.JDBCOrderDAO;
+import br.com.techsolve.jdbc.JDBCUserDAO;
+import br.com.techsolve.modelo.Client;
+import br.com.techsolve.modelo.Order;
+import br.com.techsolve.modelo.User;
+import br.com.techsolve.rest.bd.Conexao;
+
+@Path("/order")
+public class OrderRest extends UtilRest{
+
+	@POST
+	@Path("/create")
+	@Consumes("application/*")
+	public Response create(String orderParam, @Context
+		    HttpServletRequest request) {
+		
+		HttpSession session = request.getSession();
+		int idatendente = (Integer) session.getAttribute("userId");
+		String msg="";
+		
+		try {
+			
+			Order order = new Gson().fromJson(orderParam, Order.class);
+			order.setAttendantRespId(idatendente);
+			Conexao con = new Conexao();
+			Connection conn = con.openConn();
+			JDBCOrderDAO jdbcOrder = new JDBCOrderDAO(conn);
+			int result = jdbcOrder.create(order);
+			if(result==1) {
+				msg = "Ordem de serviço criada com sucesso!";
+			}else if(result==2){
+				msg= "Erro inesperado!";
+			}
+			
+			con.closeConn();
+			return this.buildResponse(msg);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+			return this.buildErrorResponse(e.getMessage());
+			
+		}
+		
+	}
+	
+	@GET
+	@Path("/getallmyorders")
+	@Consumes("application/*")
+	public Response getallmyorders(@Context HttpServletRequest req) {
+		
+		try {
+			
+			HttpSession session = req.getSession();
+			int idUser = (Integer) session.getAttribute("userId");
+			
+			List<JsonObject> listOrders = new ArrayList<JsonObject>();
+			
+			Conexao con = new Conexao();
+			Connection conn = con.openConn();
+			JDBCOrderDAO jdbcOrders = new JDBCOrderDAO(conn);
+			listOrders = jdbcOrders.getAllMyOrders(idUser);
+			
+			
+			con.closeConn();
+			return this.buildResponse(listOrders);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+			return this.buildErrorResponse(e.getMessage());
+			
+		}
+		
+	}
+	
+	@GET
+	@Path("/getall")
+	@Consumes("application/*")
+	public Response getall(@Context HttpServletRequest req) {
+		
+		try {
+			
+			HttpSession session = req.getSession();
+			int idUser = (Integer) session.getAttribute("userId");
+			int permId = (Integer) Integer.parseInt(session.getAttribute("idPermissao").toString());
+			
+			List<JsonObject> listOrders = new ArrayList<JsonObject>();
+			
+			Conexao con = new Conexao();
+			Connection conn = con.openConn();
+			JDBCOrderDAO jdbcOrders = new JDBCOrderDAO(conn);
+			listOrders = jdbcOrders.getAll(idUser, permId);
+			
+			
+			con.closeConn();
+			return this.buildResponse(listOrders);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+			return this.buildErrorResponse(e.getMessage());
+			
+		}
+		
+	}
+	
+	@GET
+	@Path("/getbyid")
+	@Consumes("application/*")
+	public Response getbyid(@QueryParam("id") int idOS) {
+		
+		try {
+			
+			Order order = new Order();
+			
+			Conexao con = new Conexao();
+			Connection conn = con.openConn();
+			JDBCOrderDAO jdbcOrders = new JDBCOrderDAO(conn);
+			order = jdbcOrders.getbyid(idOS);
+			
+			
+			con.closeConn();
+			return this.buildResponse(order);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+			return this.buildErrorResponse(e.getMessage());
+			
+		}
+		
+	}
+	
+	@GET
+	@Path("/cancel")
+	@Consumes("application/*")
+	public Response cancel(@QueryParam("idOS") int idOS, @QueryParam("justCancelarOS") String justCancelarOS) {
+		
+		try {
+			
+			Conexao con = new Conexao();
+			Connection conn = con.openConn();
+			JDBCOrderDAO jdbcOrders = new JDBCOrderDAO(conn);
+			boolean retorno =  jdbcOrders.cancel(idOS, justCancelarOS);
+			String msg="";
+			
+			if(retorno) {
+				msg = "Ordem de serviço cancelada com sucesso!";
+			}else {
+				msg = "Ops! Não foi possível cancelar a ordem de serviço.";
+			}
+			
+			
+			con.closeConn();
+			return this.buildResponse(msg);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+			return this.buildErrorResponse(e.getMessage());
+			
+		}
+		
+	}
+	
+	@PUT
+	@Path("/setTec")
+	@Consumes("application/*")
+	public Response setTec(String jsonToUpdateTec) {
+		
+		try {
+			
+			LinkedTreeMap toUpdateTec = new Gson().fromJson(jsonToUpdateTec, LinkedTreeMap.class);
+			String msg="";
+			
+			Conexao con = new Conexao();
+			Connection conn = con.openConn();
+			JDBCOrderDAO jdbcOrder = new JDBCOrderDAO(conn);
+			boolean successTranf = jdbcOrder.setTec(
+				(int)Double.parseDouble(toUpdateTec.get("idOS").toString()),
+				(int)Double.parseDouble(toUpdateTec.get("idTec").toString()),
+				toUpdateTec.get("justTransfOS").toString()
+			);
+			
+			if(successTranf) {
+				msg="Técnico Atribuído com sucesso!";
+			}else {
+				msg="Ops! Esse técnico está com muitas demandas! Tente outro técnico!";
+			}
+			
+			con.closeConn();
+			return this.buildResponse("Técnico Atribuído com sucesso!");
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+			return this.buildErrorResponse(e.getMessage());
+			
+		}
+		
+	}
+	
+	@GET
+	@Path("/takeOS")
+	@Consumes("application/*")
+	public Response takeOS(@QueryParam("idOS") int idOS, @Context HttpServletRequest req) {
+		
+		String msg="";
+		
+		HttpSession session = req.getSession();
+		int idUser = (Integer) session.getAttribute("userId");
+		int permId = (Integer) Integer.parseInt(session.getAttribute("idPermissao").toString());
+		
+		try {
+			
+			Conexao con = new Conexao();
+			Connection conn = con.openConn();
+			JDBCOrderDAO jdbcOrder = new JDBCOrderDAO(conn);
+			int respIndex = jdbcOrder.takeOS(idOS, idUser, permId);
+			
+			if(respIndex==1) {
+				msg = "Ordem de serviço assumida com sucesso!";
+			}else if(respIndex==2){
+				msg = "Erro ao assumir ordem de serviço! Você tem muitas ordens de serviço, termine alguma para poder assumir outra!";
+			}
+			
+			con.closeConn();
+			return this.buildResponse(msg);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+			return this.buildErrorResponse(e.getMessage());
+			
+		}
+		
+	}
+	
+	@GET
+	@Path("/returnOS")
+	@Consumes("application/*")
+	public Response returnOS(@QueryParam("idOS") int idOS) {
+		
+		String msg="";
+		
+		try {
+			
+			Conexao con = new Conexao();
+			Connection conn = con.openConn();
+			JDBCOrderDAO jdbcOrder = new JDBCOrderDAO(conn);
+			int respIndex = jdbcOrder.returnOS(idOS);
+			
+			if(respIndex==1) {
+				msg = "Ordem de serviço retornada com sucesso!";
+			}else if(respIndex==2){
+				msg = "Erro ao retornar ordem de serviço!";
+			}
+			
+			con.closeConn();
+			return this.buildResponse(msg);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+			return this.buildErrorResponse(e.getMessage());
+			
+		}
+		
+	}
+	
+	@GET
+	@Path("/setReviewAndBudgetOS")
+	@Consumes("application/*")
+	public Response setReviewAndBudgetOS(@QueryParam("idOS") int idOS) {
+		
+		String msg="";
+		
+		try {
+			
+			Conexao con = new Conexao();
+			Connection conn = con.openConn();
+			JDBCOrderDAO jdbcOrder = new JDBCOrderDAO(conn);
+			int respIndex = jdbcOrder.setReviewAndBudgetOS(idOS);
+			
+			if(respIndex==1) {
+				msg = "Ordem de serviço pronta para avaliação!";
+			}else if(respIndex==2){
+				msg = "Erro ao mudar estado da ordem de serviço!";
+			}
+			
+			con.closeConn();
+			return this.buildResponse(msg);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+			return this.buildErrorResponse(e.getMessage());
+			
+		}
+		
+	}
+	
+	@POST
+	@Path("/doReviewAndBudgetOS")
+	@Consumes("application/*")
+	public Response doReviewAndBudgetOS(String objStrJson) {
+		
+		String msg="";
+		
+		try {
+			
+			Order order = new Gson().fromJson(objStrJson, Order.class);
+			
+			Conexao con = new Conexao();
+			Connection conn = con.openConn();
+			JDBCOrderDAO jdbcOrder = new JDBCOrderDAO(conn);
+			int respIndex = jdbcOrder.doReviewAndBudgetOS(order);
+			
+			if(respIndex==1) {
+				msg = "Orçamento realizado! Agora a O.S. foi encaminhada para aprovação com o cliente!";
+			}else if(respIndex==2){
+				msg = "Erro ao realizar orçamento!";
+			}
+			
+			con.closeConn();
+			return this.buildResponse(msg);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+			return this.buildErrorResponse(e.getMessage());
+			
+		}
+		
+	}
+	
+	@GET
+	@Path("/reproveBudget")
+	@Consumes("application/*")
+	public Response reproveBudget(@QueryParam("idOS") int idOS) {
+		
+		String msg="";
+		
+		try {
+			
+			Conexao con = new Conexao();
+			Connection conn = con.openConn();
+			JDBCOrderDAO jdbcOrder = new JDBCOrderDAO(conn);
+			int respIndex = jdbcOrder.reproveBudget(idOS);
+			
+			if(respIndex==1) {
+				msg = "Orçamento reprovado com sucesso!";
+			}else if(respIndex==2){
+				msg = "Erro ao reprovar orçamento da ordem de serviço!";
+			}
+			
+			con.closeConn();
+			return this.buildResponse(msg);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+			return this.buildErrorResponse(e.getMessage());
+			
+		}
+		
+	}
+	
+	@GET
+	@Path("/approveBudget")
+	@Consumes("application/*")
+	public Response approveBudget(@QueryParam("idOS") int idOS) {
+		
+		String msg="";
+		
+		try {
+			
+			Conexao con = new Conexao();
+			Connection conn = con.openConn();
+			JDBCOrderDAO jdbcOrder = new JDBCOrderDAO(conn);
+			int respIndex = jdbcOrder.approveBudget(idOS);
+			
+			if(respIndex==1) {
+				msg = "Orçamento aprovado com sucesso!";
+			}else if(respIndex==2){
+				msg = "Erro ao aprovar orçamento da ordem de serviço!";
+			}
+			
+			con.closeConn();
+			return this.buildResponse(msg);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+			return this.buildErrorResponse(e.getMessage());
+			
+		}
+		
+	}
+	
+	@GET
+	@Path("/doMaintenance")
+	@Consumes("application/*")
+	public Response doMaintenance(@QueryParam("idOS") int idOS) {
+		
+		String msg="";
+		
+		try {
+			
+			Conexao con = new Conexao();
+			Connection conn = con.openConn();
+			JDBCOrderDAO jdbcOrder = new JDBCOrderDAO(conn);
+			int respIndex = jdbcOrder.doMaintenance(idOS);
+			
+			if(respIndex==1) {
+				msg = "Ordem de serviço pronta para manutenção!";
+			}else if(respIndex==2){
+				msg = "Erro ao preparar a ordem de serviço para manutenção!";
+			}
+			
+			con.closeConn();
+			return this.buildResponse(msg);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+			return this.buildErrorResponse(e.getMessage());
+			
+		}
+		
+	}
+	
+	@POST
+	@Path("/doInfoNewProblemAndBudget")
+	@Consumes("application/*")
+	public Response doInfoNewProblemAndBudget(String objStrJson) {
+		
+		String msg="";
+		
+		try {
+			
+			Order order = new Gson().fromJson(objStrJson, Order.class);
+			
+			Conexao con = new Conexao();
+			Connection conn = con.openConn();
+			JDBCOrderDAO jdbcOrder = new JDBCOrderDAO(conn);
+			int respIndex = jdbcOrder.doInfoNewProblemAndBudget(order);
+			
+			if(respIndex==1) {
+				msg = "Novo problema informado! Assim que o cliente aprovar o novo orçamento, a ordem de serviço irá ficar disponível para continuar a manutenção!";
+			}else if(respIndex==2){
+				msg = "Erro ao informar novo problema!";
+			}
+			
+			con.closeConn();
+			return this.buildResponse(msg);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+			return this.buildErrorResponse(e.getMessage());
+			
+		}
+		
+	}
+	
+	@GET
+	@Path("/approveNewBudget")
+	@Consumes("application/*")
+	public Response approveNewBudget(@QueryParam("idOS") int idOS) {
+		
+		String msg="";
+		
+		try {
+			
+			Conexao con = new Conexao();
+			Connection conn = con.openConn();
+			JDBCOrderDAO jdbcOrder = new JDBCOrderDAO(conn);
+			int respIndex = jdbcOrder.approveNewBudget(idOS);
+			
+			if(respIndex==1) {
+				msg = "Novo orçamento aprovado com sucesso!";
+			}else if(respIndex==2){
+				msg = "Erro ao aprovar novo orçamento da ordem de serviço!";
+			}
+			
+			con.closeConn();
+			return this.buildResponse(msg);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+			return this.buildErrorResponse(e.getMessage());
+			
+		}
+		
+	}
+	
+	@GET
+	@Path("/reproveNewBudget")
+	@Consumes("application/*")
+	public Response reproveNewBudget(@QueryParam("idOS") int idOS) {
+		
+		String msg="";
+		
+		try {
+			
+			Conexao con = new Conexao();
+			Connection conn = con.openConn();
+			JDBCOrderDAO jdbcOrder = new JDBCOrderDAO(conn);
+			int respIndex = jdbcOrder.reproveNewBudget(idOS);
+			
+			if(respIndex==1) {
+				msg = "Novo orçamento reprovado com sucesso!";
+			}else if(respIndex==2){
+				msg = "Erro ao reprovar novo orçamento da ordem de serviço!";
+			}
+			
+			con.closeConn();
+			return this.buildResponse(msg);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+			return this.buildErrorResponse(e.getMessage());
+			
+		}
+		
+	}
+	
+	@GET
+	@Path("/finishMaintenance")
+	@Consumes("application/*")
+	public Response finishMaintenance(@QueryParam("idOS") int idOS) {
+		
+		String msg="";
+		
+		try {
+			
+			Conexao con = new Conexao();
+			Connection conn = con.openConn();
+			JDBCOrderDAO jdbcOrder = new JDBCOrderDAO(conn);
+			int respIndex = jdbcOrder.finishMaintenance(idOS);
+			
+			if(respIndex==1) {
+				msg = "Manutenção finalizada com sucesso!";
+			}else if(respIndex==2){
+				msg = "Erro ao finalizar a manutenção da ordem de serviço!";
+			}
+			
+			con.closeConn();
+			return this.buildResponse(msg);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+			return this.buildErrorResponse(e.getMessage());
+			
+		}
+		
+	}
+	
+	@GET
+	@Path("/doPayment")
+	@Consumes("application/*")
+	public Response doPayment(@QueryParam("idOS") int idOS) {
+		
+		String msg="";
+		
+		try {
+			
+			Conexao con = new Conexao();
+			Connection conn = con.openConn();
+			JDBCOrderDAO jdbcOrder = new JDBCOrderDAO(conn);
+			int respIndex = jdbcOrder.doPayment(idOS);
+			
+			if(respIndex==1) {
+				msg = "Manutenção finalizada com sucesso!";
+			}else if(respIndex==2){
+				msg = "Erro ao finalizar a manutenção da ordem de serviço!";
+			}
+			
+			con.closeConn();
+			return this.buildResponse(msg);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+			return this.buildErrorResponse(e.getMessage());
+			
+		}
+		
+	}
+	
+}

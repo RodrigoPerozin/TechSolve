@@ -1,0 +1,21 @@
+@charset "UTF-8";
+
+body{
+    height: 100vh;
+    justify-content: center;
+    text-align: center;
+    display: flex;
+    align-items: center;
+}
+
+.content{
+	height: 140px;
+}
+
+h1, h3{
+	text-shadow: 4px 2px 8px #858585;
+}
+
+h3 a{
+	text-shadow: none;
+}

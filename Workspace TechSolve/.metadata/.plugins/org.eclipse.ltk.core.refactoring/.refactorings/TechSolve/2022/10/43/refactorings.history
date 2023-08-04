@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;JDBCinterfaceClient.java&apos; to &apos;TechSolve/src/br.com.techsolve.jdbcinterface&apos;&#x0D;&#x0A;- Original project: &apos;TechSolve&apos;&#x0D;&#x0A;- Destination element: &apos;TechSolve/src/br.com.techsolve.jdbcinterface&apos;&#x0D;&#x0A;- Original element: &apos;br.com.techsolve.jdbcinterface.JDBCinterfaceClient.java&apos;" description="Copy compilation unit" destination="/src&lt;br.com.techsolve.jdbcinterface" element1="/src&lt;br.com.techsolve.jdbcinterface{JDBCinterfaceClient.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1666051725306" units="1" version="1.0"/>
+</session>

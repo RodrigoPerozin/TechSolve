@@ -1,0 +1,40 @@
+<meta charset="UTF-8">
+<h1>Registrar Cliente</h1><br>
+<form name="frmRegister" id="frmRegister">
+	<fieldset id="fieldsetRegister">
+		<table id="tableRegister">
+			<tbody class="client-tbody">
+				<tr>				
+					<td><label for="name"><p>Nome Completo:</p></label></td>
+					<td><input oninput="verifyFormOk()" class="form-control" type="text" name="name" id="name" placeholder="Nome Cliente" required></td>
+				</tr>
+				<tr>
+					<td><label for="cpf"><p>CPF:</p></label></td>
+					<td><input oninput="verifyFormOk()" class="form-control" type="text" name="cpf" id="cpf" placeholder="000.000.000-00" required></td>
+				</tr>
+				<tr>
+					<td><label for="email"><p>E-mail:</p></label></td>
+					<td><input oninput="verifyFormOk()" class="form-control" type="text" name="email" id="email" placeholder="clientetal@gmail.com.br" required></td>
+				</tr>
+				<tr>
+					<td><label for="phone"><p>Telefone:</p></label></td>
+					<td><input oninput="verifyFormOk()" class="form-control"type="text" name="phone" id="phone" placeholder="(47)90000-0000" required></td>
+				</tr>
+				<tr class="btn-tr-client">
+					<td spancol=2>
+					<input type="reset" onmouseout="verifyFormOk()" class="btn btn-primary mb-3" value="Limpar">&nbsp;
+					<input type="button" class="btn btn-secondary mb-3" name="submitRegister" onclick="TECHSOLVE.client.register()" id="submitRegister" value="Registrar" disabled><br>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</fieldset>
+</form>
+<hr>
+<div id="tableClientsdiv" name="tableClientsdiv">
+</div>
+<script>
+	verifyFormOk();
+	$("#phone").mask('(99)99999-9999');
+	$("#cpf").mask('999.999.999-99');
+</script>

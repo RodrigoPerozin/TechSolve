@@ -1,0 +1,636 @@
+TECHSOLVE.order.getStatusAsText = (statusID) => {
+	
+	if(statusID==0){ //criada
+		return "CRIADA";
+	}else if(statusID==1){ //assumida
+		return "ASSUMIDA";
+	}else if(statusID==2){ //em avaliação
+		return "EM AVALIAÇÃO"; 
+	}else if(statusID==3){ //em aprovação
+		return "ORÇAMENTO EM APROVAÇÃO";
+	}else if(statusID==5){ //cancelada	
+		return "CANCELADA";
+	}else if(statusID==6){ //orçamento aprovado
+		return "ORÇAMENTO APROVADO";
+	}else if(statusID==4){ //orçamento reprovado
+		return "ORÇAMENTO REPROVADO";
+	}else if(statusID==7){ //em manutenção
+		return "EM MANUTENÇÃO";
+	}else if(statusID==8){ //em novo problema
+		return "NOVO PROBLEMA";
+	}else if(statusID==9){ //novo orçamento/problema aprovado
+		return "ORÇAMENTO APROVADO";
+	}else if(statusID==10){ //novo orçamento/problema reprovado
+		return "ORÇAMENTO REPROVADO";
+	}else if(statusID==11){ //aguardando resposta cliente
+		return "AGUARDANDO CLIENTE";
+	}else if(statusID==12){ //pagamento aprovado
+		return "FINALIZADA";
+	}else if(statusID==13){ //pagamento reprovado
+		return "PAGAMENTO REPROVADO";
+	}else if(statusID==12){ //pagamento aprovado
+		return "red";
+	}else if(statusID==13){ //pagamento reprovado
+		return "red";
+	}
+	
+}
+
+TECHSOLVE.order.getStatusAsColor = (statusID) => {
+	
+	if(statusID==0){ //criada
+		return "yellow";
+	}else if(statusID==1){ //assumida
+		return "blue";
+	}else if(statusID==2){ //em avaliação
+		return "orange";
+	}else if(statusID==3){ //em aprovação
+		return "purple";
+	}else if(statusID==4){ //orçamento reprovado
+		return "red";
+	}else if(statusID==5){ //cancelada
+		return "red";
+	}else if(statusID==6){ //orçamento aprovado
+		return "green";
+	}else if(statusID==7){ //em manutenção
+		return "green";
+	}else if(statusID==8){ //em novo problema
+		return "pink";
+	}else if(statusID==9){ //novo orçamento/problema aprovado
+		return "green";
+	}else if(statusID==10){ //novo orçamento/problema reprovado
+		return "red";
+	}else if(statusID==11){ //aguardando resposta cliente
+		return "orange";
+	}else if(statusID==12){ //pagamento aprovado
+		return "red";
+	}else if(statusID==13){ //pagamento reprovado
+		return "red";
+	}
+}
+
+TECHSOLVE.order.getall = () => {
+	$("order-boxes").remove();
+	var actionToGet;
+	if(DINAMICCONTEXT==="orders"){
+		actionToGet = "getall";
+	}else{
+		actionToGet = "getallmyorders";
+	}
+	
+	 $.ajax({
+		type: "GET",
+		url: TECHSOLVE.RESTPATH + "order/"+actionToGet,
+		success: async (data) => {
+			
+			document.getElementById("section").style.display = "flex";
+			document.getElementById("section").style.flexFlow = "column";
+			document.getElementById("section").style.height = "90vh";
+			var dataObj = JSON.parse(data);
+			
+			htmlForm = "";
+			var statusText = "";
+			var clientName = "";
+			
+			htmlForm+="<div id='order-boxes'>";
+			
+			for(var i=0; i<dataObj.length;i++){
+				
+				var primColor;
+				htmlForm+= "<div class='orderBox ";
+			
+				primColor = TECHSOLVE.order.getStatusAsColor(dataObj[i].status);
+				statusText = TECHSOLVE.order.getStatusAsText(dataObj[i].status);
+				
+				htmlForm+=primColor;
+				
+				htmlForm+="'>";
+				htmlForm+="<div class='persist-sizeBox'>";
+				var dataFormated = dataObj[i].data_criacao;
+				dataFormated = dataFormated.slice(8, 10) + "/" + dataFormated.slice(5, 7)+ "/" + dataFormated.slice(0, 4);
+				
+				htmlForm+="<h5><b>"+dataObj[i].idordem_servico+ "</b>" + " - " + dataFormated + " - " + dataObj[i].imei_aparelho + " <span>" + statusText;
+				
+				if(dataObj[i].status==7){
+					htmlForm+="<img src='"+ TECHSOLVE.ROOT +"assets/imgs/gear-icon.png' class='icon-gear'>";
+				}
+				
+				htmlForm+="</span></h5>";
+				
+				htmlForm+="<p>Descrição: " + dataObj[i].descricao_problema + "</p>";
+				
+				var clientN = await $.get(TECHSOLVE.RESTPATH + "client/getbyid", "id="+dataObj[i].idcliente);
+				var clientNome = clientN.name;
+				
+				htmlForm+="<p>Cliente: " + clientNome + "</p>";
+				
+				if(DINAMICCONTEXT==="orders"){
+					
+					if(dataObj[i].status!=5 || dataObj[i].status!=4){
+						htmlForm+=
+							"<div>"
+							+"<input type='button' value='Assumir O.S.' onclick='TECHSOLVE.order.takeOS("+ dataObj[i].idordem_servico +")' class='btn btn-primary inpt-btn-box'>"
+							+"</div>";
+					}
+					
+				}else if(DINAMICCONTEXT=="myorders"){
+					
+					if(dataObj[i].status==1){ //ASSUMIDA
+						htmlForm+=
+							"<div>"
+							+"<input type='button' value='Devolver O.S.' onclick='TECHSOLVE.order.returnOS("+ dataObj[i].idordem_servico +")' class='btn btn-secondary inpt-btn-box'>"
+							+"<input type='button' value='Avaliar O.S.' onclick='TECHSOLVE.order.setReviewAndBudgetOS("+ dataObj[i].idordem_servico +")' class='btn btn-warning inpt-btn-box'>"
+							+"</div>";
+					}else if(dataObj[i].status==2){ //EM AVALIAÇÃO
+						htmlForm+=
+							"<div>"
+							+"<input type='button' value='Realizar orçamento' onclick='TECHSOLVE.order.openReviewAndBudgetOS("+ dataObj[i].idordem_servico +")' class='btn btn-secondary inpt-btn-box reviewAndBudgetOS'>"
+							+"</div>";
+					}else if(dataObj[i].status==6){ //EM MANUTENÇÃO
+						htmlForm+=
+							"<div>"
+							+"<input type='button' value='Realizar manutenção' onclick='TECHSOLVE.order.startManutOS("+ dataObj[i].idordem_servico +")' class='btn btn-success inpt-btn-box startManutOS'>"
+							+"</div>";
+					}else if(dataObj[i].status==7){ //EM MANUTENÇÃO
+						htmlForm+=
+							"<div>"
+							+"<input type='button' value='Novo problema' onclick='TECHSOLVE.order.infoNewProblemManutOS("+ dataObj[i].idordem_servico +")' class='btn btn-secondary inpt-btn-box'>"
+							+"<input type='button' value='Finalizar manutenção' onclick='TECHSOLVE.order.finishManutOS("+ dataObj[i].idordem_servico +")' class='btn btn-success inpt-btn-box'>"
+							+"</div>";
+					}else if(dataObj[i].status==9){ //EM MANUTENÇÃO
+						htmlForm+=
+							"<div>"
+							+"<input type='button' value='Realizar manutenção' onclick='TECHSOLVE.order.startManutOS("+ dataObj[i].idordem_servico +")' class='btn btn-success inpt-btn-box startManutOS'>"
+							+"</div>";
+					}
+					
+				}
+				
+				htmlForm+="</div>";
+				
+				htmlForm+="<div><a href='javascript:TECHSOLVE.order.openBoxMenu("+ dataObj[i].idordem_servico +")' class='options "+ primColor + "'><div class='treeDot'>";
+				htmlForm+="...";
+				htmlForm+="</div></a>"
+				+"<div class='div-options-floating "+primColor+"' id='div-options-floating-"+ dataObj[i].idordem_servico +"'>"
+				+"<button class='btn opt-floating' onclick='TECHSOLVE.order.openView("+ dataObj[i].idordem_servico +")'>Visualizar</button>"
+				+"</div>"
+				+"</div>";
+				
+				htmlForm+="</div>";
+		
+			}
+			
+			htmlForm+="</div>";
+			$("#section").append(htmlForm);
+			
+		},
+		error: (info) => {
+			TECHSOLVE.showPopUp("Mensagem", "Erro ao buscar ordens de serviço: " + info.responseText + " - " + info.status + " - " + info.statusText, null);
+		}
+	});
+	
+}
+
+TECHSOLVE.order.infoNewProblemManutOS = async (idOS) => {
+	
+	var infoNewProblemAlready="",txtBudgetAlready="",  totalPriceAlready=0;
+	
+	var respJSON = await $.get(TECHSOLVE.RESTPATH + "order/getbyid", "id="+idOS);
+	
+	var infoNewProblemAlready = (JSON.parse(respJSON).infoNewProblem==undefined) ? "": JSON.parse(respJSON).infoNewProblem;
+	var txtBudgetAlready = JSON.parse(respJSON).budget;
+	var totalPriceAlready = JSON.parse(respJSON).totalPrice;
+	
+	var htmlFormated =
+		"<label><p><font color='red'>*</font>Informações do novo problema encontrado:</p></label>"
+		+"<textarea onchange='checkIfCanSubmitNewProblemBudget()' class='form-control' id='inptInfoNewProblem'>" + infoNewProblemAlready + "</textarea>"
+		+"<label><p><font color='red'>*</font>Orçamento da ordem de serviço:</p></label>"
+		+"<br><textarea style='min-height: 300px;' onchange='checkIfCanSubmitNewProblemBudget()' oninput='changeHeightBudgetTxtArea(this.scrollHeight)' class='form-control' id='txtAreaBudget' name='txtAreaBudget'>"+ txtBudgetAlready +"</textarea>"
+		+"<label><p><font color='red'>*</font>Valor total da ordem de serviço:</p></label>"
+		+"<input onchange='checkIfCanSubmitNewProblemBudget()' class='form-control' type='number' id='inptTotalBudget' value='"+ totalPriceAlready +"'>"
+		+"<br><br><p style='margin:0;color: red;' id='msgError' hidden></p>";
+	
+	$("#modalWarning").html(htmlFormated);
+	
+	var modalInfoNewProblemAndBudget = {
+
+		title: "Refazer avaliação/orçamento da OS",
+		height: 715,
+		width: 835,
+		modal: true,
+		buttons: {
+			"ENVIAR PARA APROVAÇÃO": async function(){
+				
+				var budgetValue = $("#txtAreaBudget").val();
+				var inptTotalBudget = $("#inptTotalBudget").val();
+				var inptInfoNewProblem = $("#inptInfoNewProblem").val();
+				
+				if(inptInfoNewProblem=="" || inptInfoNewProblem==null || inptInfoNewProblem==undefined || inptInfoNewProblem==" "){
+					$("#msgError").html("*Preencha as informações do novo problema corretamente!");
+					$("#msgError").removeAttr("hidden");
+					checkIfCanSubmitNewProblemBudget();
+					window.location.href = "#msgError";
+				}else if(budgetValue=="" || budgetValue==null || budgetValue==undefined || budgetValue==" "){
+					$("#msgError").html("*Preencha o orçamento corretamente!");
+					$("#msgError").removeAttr("hidden");
+					checkIfCanSubmitNewProblemBudget();
+				}else if(inptTotalBudget==null || inptTotalBudget == undefined || isNaN(inptTotalBudget)){
+					$("#msgError").html("*Preencha o valor total corretamente!");
+					$("#msgError").removeAttr("hidden");
+					checkIfCanSubmitNewProblemBudget();
+				}else{
+					
+					TECHSOLVE.order.doInfoNewProblem(idOS, budgetValue, inptTotalBudget, inptInfoNewProblem);
+					await TECHSOLVE.order.getall();
+					
+				}
+					
+				
+			},
+			"CANCELAR": function(){
+				$(this).dialog("close");
+			}
+		},
+		close: function(){
+			
+		}
+	}
+	
+	$("#modalWarning").dialog(modalInfoNewProblemAndBudget);
+	
+}
+
+TECHSOLVE.order.doInfoNewProblem = (idOS, budgetValue, inptTotalBudget, inptInfoNewProblem) => {
+	
+	var payload = {
+		"orderId": parseInt(idOS),
+		"budget": budgetValue,
+		"totalPrice": parseFloat(inptTotalBudget),
+		"infoNewProblem": inptInfoNewProblem
+	}
+	
+	$.post(TECHSOLVE.RESTPATH + "order/doInfoNewProblemAndBudget", JSON.stringify(payload), (msg)=>{
+		TECHSOLVE.showPopUp("Mensagem", msg, null);
+	});
+}
+
+function checkIfCanSubmitNewProblemBudget(){
+	
+	var valueTxtAsStringBudget = $("#txtAreaBudget").val().toString();
+	var valueTotalBudgetStr = $("#inptTotalBudget").val().toString();
+	var valueInfoNewProblem = $("#inptInfoNewProblem").val().toString();
+	var ourBtn = $(".ui-dialog-buttonset button")[0];
+	
+	if(valueInfoNewProblem=="" || valueInfoNewProblem==" " || valueInfoNewProblem==null || valueTxtAsStringBudget=="" || valueTxtAsStringBudget==null || valueTxtAsStringBudget==" " || valueTxtAsStringBudget==undefined
+	|| valueTotalBudgetStr=="" || valueTotalBudgetStr==null || valueTotalBudgetStr==" " || valueTotalBudgetStr==undefined){
+		
+		$("#msgError").removeAttr("hidden");
+		
+		if(valueInfoNewProblem=="" || valueInfoNewProblem==" " || valueInfoNewProblem==null){
+			$("#msgError").html("*Preencha as informações do novo problema corretamente!");
+			document.getElementById("inptInfoNewProblem").focus();
+		}else if(valueTxtAsStringBudget=="" || valueTxtAsStringBudget==null || valueTxtAsStringBudget==undefined || valueTxtAsStringBudget==" "){
+			$("#msgError").html("*Preencha o orçamento corretamente!");
+			document.getElementById("txtAreaBudget").focus();
+		}else if(valueTotalBudgetStr=="" || valueTotalBudgetStr==null || valueTotalBudgetStr==" " || valueTotalBudgetStr==undefined){
+			$("#msgError").html("*Preencha o valor total corretamente!");
+			document.getElementById("inptTotalBudget").focus();
+		}
+		
+		ourBtn.setAttribute("disabled", "")
+		ourBtn.style.cursor = 'default';
+	}else{
+		ourBtn.removeAttribute("disabled")
+		ourBtn.style.cursor = 'pointer';
+		$("#msgError").attr("hidden", "")
+	}
+	
+}
+
+TECHSOLVE.order.finishManutOS = async (idOS) => {
+	
+	$.get(TECHSOLVE.RESTPATH + "order/finishMaintenance", "idOS="+idOS, (msg)=>{
+		TECHSOLVE.showPopUp("Mensagem", msg, null);
+		await TECHSOLVE.order.getall();
+	});
+	
+}
+
+TECHSOLVE.order.startManutOS = async (idOS) => {
+	$.get(TECHSOLVE.RESTPATH + "order/doMaintenance", "idOS="+idOS, (msg)=>{
+		TECHSOLVE.showPopUp("Mensagem", msg, null);
+		await TECHSOLVE.order.getall();
+	});
+}
+
+var checkIfCanSubmitBudget = () => {
+	
+	var valueTxtAsStringBudget = $("#txtAreaBudget").val().toString();
+	var valueTotalBudgetStr = $("#inptTotalBudget").val().toString();
+	var ourBtn = $(".ui-dialog-buttonset button")[0];
+	
+	if(valueTxtAsStringBudget=="" || valueTxtAsStringBudget==null || valueTxtAsStringBudget==" " || valueTxtAsStringBudget==undefined
+	|| valueTotalBudgetStr=="" || valueTotalBudgetStr==null || valueTotalBudgetStr==" " || valueTotalBudgetStr==undefined){
+		
+		$("#msgError").removeAttr("hidden");
+		
+		if(valueTxtAsStringBudget=="" || valueTxtAsStringBudget==null || valueTxtAsStringBudget==undefined || valueTxtAsStringBudget==" "){
+			$("#msgError").html("*Preencha o orçamento corretamente!");
+			document.getElementById("txtAreaBudget").focus();
+		}else{
+			$("#msgError").html("*Preencha o valor total corretamente!");
+			document.getElementById("inptTotalBudget").focus();
+		}
+		
+		ourBtn.setAttribute("disabled", "")
+		ourBtn.style.cursor = 'default';
+	}else{
+		ourBtn.removeAttribute("disabled")
+		ourBtn.style.cursor = 'pointer';
+		$("#msgError").attr("hidden", "")
+	}
+	
+}
+
+function changeHeightBudgetTxtArea(heightPx){
+	
+	$("#txtAreaBudget").css("height", (heightPx+2)+"px");
+	
+}
+
+TECHSOLVE.order.openReviewAndBudgetOS = (idOS) => {
+	
+	var htmlFormated =
+		"<label><p>Orçamento da ordem de serviço:</p></label>"
+		+"<br><textarea style='min-height: 300px;' onchange='checkIfCanSubmitBudget()' oninput='changeHeightBudgetTxtArea(this.scrollHeight)' class='form-control' id='txtAreaBudget' name='txtAreaBudget'></textarea>"
+		+"<label><p>Valor total da ordem de serviço:</p></label>"
+		+"<input onchange='checkIfCanSubmitBudget()' class='form-control' type='number' id='inptTotalBudget'>"
+		+"<br><br><p style='margin:0;color: red;' id='msgError' hidden></p>";
+	
+	$("#modalWarning").html("");
+	$("#modalWarning").html(htmlFormated);
+	
+	var modalReviewAndBudgetOS = {
+
+		title: "Realizar avaliação/orçamento da OS",
+		height: 640,
+		width: 835,
+		modal: true,
+		buttons: {
+			"ENVIAR PARA APROVAÇÃO": async function(){
+				var budgetValue = $("#txtAreaBudget").val();
+				var inptTotalBudget = $("#inptTotalBudget").val();
+				
+				if(budgetValue=="" || budgetValue==null || budgetValue==undefined || budgetValue==" "){
+					$("#msgError").html("*Preencha o orçamento corretamente!");
+					$("#msgError").removeAttr("hidden");
+					checkIfCanSubmitBudget();
+					document.getElementById("txtAreaBudget").focus();
+				}else if(inptTotalBudget==null || inptTotalBudget == undefined || isNaN(inptTotalBudget)){
+					$("#msgError").html("*Preencha o valor total corretamente!");
+					$("#msgError").removeAttr("hidden");
+					checkIfCanSubmitBudget();
+					document.getElementById("inptTotalBudget").focus();
+				}else{
+					
+					TECHSOLVE.order.reviewAndBudgetOS(idOS, budgetValue, inptTotalBudget);
+					
+				}
+				
+			},
+			"CANCELAR": function(){
+				$(this).dialog("close");
+			}
+		},
+		close: function(){
+			
+		}
+	}
+	
+	$("#modalWarning").dialog(modalReviewAndBudgetOS);
+	
+}
+
+TECHSOLVE.order.reviewAndBudgetOS = async (idOS, budgetValue, inptTotalBudget) => {
+	
+	var payload = {
+		"orderId": parseInt(idOS),
+		"budget": budgetValue,
+		"totalPrice": parseFloat(inptTotalBudget)
+	}
+	
+	$.post(TECHSOLVE.RESTPATH + "order/doReviewAndBudgetOS", JSON.stringify(payload), (msg)=>{
+		TECHSOLVE.showPopUp("Mensagem", msg, null);
+		await TECHSOLVE.order.getall();
+	});
+	
+}
+
+TECHSOLVE.order.setReviewAndBudgetOS = async (idOS) => {
+	$.get(TECHSOLVE.RESTPATH + "order/setReviewAndBudgetOS", "idOS="+idOS, (msg)=>{
+		TECHSOLVE.showPopUp("Mensagem", msg, null);
+		await TECHSOLVE.order.getall();
+	});
+}
+
+TECHSOLVE.order.returnOS = async (idOS) => {
+	$.get(TECHSOLVE.RESTPATH + "order/returnOS", "idOS="+idOS, (msg)=>{
+		TECHSOLVE.showPopUp("Mensagem", msg, null);
+		await TECHSOLVE.order.getall();
+	});
+}
+
+TECHSOLVE.order.openBoxMenu = (idOS) => {
+	$("#div-options-floating-"+idOS).show();
+	$("body").attr("onclick", "TECHSOLVE.order.closeAllOptionsFloating()");
+}
+
+TECHSOLVE.order.closeAllOptionsFloating = () => {
+	$(".div-options-floating").hide();
+}
+
+TECHSOLVE.order.openView = async (idOS) => {
+	
+	$.ajax({
+		type: "GET",
+		url: TECHSOLVE.RESTPATH + "order/getbyid",
+		data: "id="+idOS,
+		success: async function(order){
+			var orderObj = JSON.parse(order);
+			var htmlFormated = "";
+			
+			htmlFormated += 
+				"<label><p>ID da ordem de serviço:</p></label>"
+				+"<input class='form-control' type='number' value='"+ orderObj.orderId +"' disabled>"
+				+"<label><br><p>Status da ordem de serviço:</p></label>"
+				+"<input class='form-control' type='text' value='"+ TECHSOLVE.order.getStatusAsText(orderObj.statusOS) +"' disabled>"
+				+"<label><br><p>Data de criação da ordem de serviço:</p></label>"
+				+"<input class='form-control' type='text' value='"+ formatDataPTBR(orderObj.creationDate) +"' disabled>"
+				+"<label><br><p>Data de término da ordem de serviço:</p></label>"
+				+"<input class='form-control' type='text' value='"+ formatDataPTBR(orderObj.finishDate) +"' disabled>"
+				+"<label><br><p>Descrição do problema da ordem de serviço:</p></label>";
+			
+				if(orderObj.problemDesc == undefined){
+						orderObj.problemDesc = "";
+				}
+			
+			htmlFormated+=	
+				"<textarea id='txtAreaProblemDesc' class='form-control' type='text' disabled>"+ orderObj.problemDesc +"</textarea>"
+				+"<label><br><p>Cliente:</p></label>";
+				
+				var clientRespObj = await $.get(TECHSOLVE.RESTPATH + "client/getbyid", ("id="+orderObj.clientId));
+				
+			htmlFormated+=
+				"<input class='form-control' type='text' value='"+ (clientRespObj.name) +"' disabled>"
+				+"<label><br><p>Atendente responsável pela ordem de serviço:</p></label>";
+				
+				var atendente = await $.get(TECHSOLVE.RESTPATH + "user/getbyid", ("id="+orderObj.attendantRespId));
+				
+			htmlFormated+=
+				"<input class='form-control' type='text' value='"+ atendente.name +"' disabled>"
+				+"<label><br><p>Técnico responsável pela ordem de serviço:</p></label>";
+				
+				var tecnico = await $.get(TECHSOLVE.RESTPATH + "user/getbyid", ("id="+orderObj.technicianRespId));
+				
+				if(tecnico.name == undefined){
+					tecnico.name = "";
+				}
+				
+			htmlFormated+=
+				"<input class='form-control' type='text' value='"+ tecnico.name +"' disabled>"
+				+"<label><br><p>Orçamento da ordem de serviço:</p></label>";
+				
+				if(orderObj.budget==undefined){
+					orderObj.budget = "";
+				}
+				
+			htmlFormated+=
+				"<textarea id='txtAreaBudget' class='form-control' type='text' disabled>"+ orderObj.budget +"</textarea>"
+				+"<label><br><p>Valor total da ordem de serviço:</p></label>";
+				
+				var precoFormated = "";
+				
+				if(orderObj.totalPrice==0){
+					precoFormated = "R$0";
+				}else{
+					precoFormated = "R$"+orderObj.totalPrice;
+					if(precoFormated.includes(".")){
+						precoFormated = precoFormated.replace(".", ",");
+					}
+				}
+				
+			htmlFormated+=
+				"<input class='form-control' type='text' value='"+ precoFormated +"' disabled>"
+				+"<label><br><p>IMEI do aparelho da ordem de serviço:</p></label>"
+				+"<input class='form-control' type='text' value='"+ orderObj.imei +"' disabled>"
+				+"<label><br><p>Modelo do aparelho da ordem de serviço:</p></label>"
+				+"<input class='form-control' type='text' value='"+ orderObj.model +"' disabled>"
+				+"<label><br><p>Cor do aparelho da ordem de serviço:</p></label>";
+				
+				if(orderObj.color==undefined){
+					orderObj.color = "";
+				}
+				
+			htmlFormated+=		
+				"<input class='form-control' type='text' value='"+ orderObj.color +"' disabled>"
+				+"<label><br><p>Existe um novo problema na manutenção do aparelho da ordem de serviço?</p></label>"
+				
+				var novoProblema="";
+				if(orderObj.newProblem==0){
+					novoProblema = "Não";
+				}else{
+					novoProblema = "Sim";
+				}
+				
+			htmlFormated+=		
+				"<input class='form-control' type='text' value='"+ novoProblema +"' disabled>"
+				+"<label><br><p>Motivo do cancelamento da ordem de serviço:</p></label>"
+				
+				var motivoCancelamento="";
+				if(orderObj.cancelReason!=undefined){
+					motivoCancelamento = orderObj.cancelReason;
+				}
+				
+			htmlFormated+=		
+				"<textarea id='txtAreaMotivoCancelamento' class='form-control' type='text' disabled>"+ motivoCancelamento +"</textarea>"
+				+"<label><br><p>Justificativa da transferência de responsabilidade da ordem de serviço:</p></label>"
+				
+				var justTransfResp = "";
+				if(orderObj.justTransResp!=undefined){
+					justTransfResp = orderObj.justTransResp;
+				}
+				
+			htmlFormated+=
+				"<textarea id='txtAreaJustTransResp' class='form-control' type='text' disabled>"+ justTransfResp +"</textarea>"
+				+"<label><br><p>Informações do novo problema na ordem de serviço:</p></label>"
+				
+				var infoNewProblem="";
+				if(orderObj.infoNewProblem!=undefined){
+					infoNewProblem = orderObj.infoNewProblem;
+				}
+				
+			htmlFormated+=
+				"<textarea id='txtAreaInfoNewProblem' class='form-control' type='text' disabled>"+ infoNewProblem +"</textarea>"
+				+"<br>";
+				
+				
+			$("#modalWarning").html(htmlFormated);
+			
+			var modalAlter = {
+
+				title: "Visualizar OS",
+				height: 583,
+				width: 835,
+				modal: true,
+				buttons: {
+					"OK": function(){
+						$(this).dialog("close");
+					}
+				},
+				close: function(){
+					
+				}
+			}	
+
+			$("#modalWarning").dialog(modalAlter);
+			
+			var elementTxtArea = $("#txtAreaBudget")[0];
+			elementTxtArea.style.height = ((elementTxtArea.scrollHeight)+2)+"px";
+			
+			var elementTxtAreaProblemDesc = $("#txtAreaProblemDesc")[0];
+			elementTxtAreaProblemDesc.style.height = ((elementTxtAreaProblemDesc.scrollHeight)+2)+"px";
+
+			var elementTxtAreaMotCancel = $("#txtAreaMotivoCancelamento")[0];
+			elementTxtAreaMotCancel.style.height = ((elementTxtAreaMotCancel.scrollHeight)+2)+"px";
+
+			var elementTxtAreaJustTransfResp = $("#txtAreaJustTransResp")[0];
+			elementTxtAreaJustTransfResp.style.height = ((elementTxtAreaJustTransfResp.scrollHeight)+2)+"px";
+			
+			var elementTxtAreaInfoNewProblem = $("#txtAreaInfoNewProblem")[0];
+			elementTxtAreaInfoNewProblem.style.height = ((elementTxtAreaInfoNewProblem.scrollHeight)+2)+"px";
+
+		},
+		error: function(info){
+			TECHSOLVE.showPopUp("Mensagem", "Erro ao coletar informações da O.S.: " + info.responseText + " - " + info.status + " - " + info.statusText, null);
+		}
+	});
+}
+
+TECHSOLVE.order.takeOS = async (idOS) => {
+	
+	$.ajax({
+		type: "GET",
+		url: TECHSOLVE.RESTPATH + "order/takeOS",
+		data: "idOS="+idOS,
+		success: async function(msg){
+			await TECHSOLVE.order.getall();
+			TECHSOLVE.showPopUp("Mensagem", msg, null);
+			
+		},
+		error: async function(info){
+			TECHSOLVE.showPopUp("Mensagem", "Erro ao assumir ordem de serviço: " + info.responseText + " - " + info.status + " - " + info.statusText, null);
+			await TECHSOLVE.order.getall();
+		}
+	});
+	
+}

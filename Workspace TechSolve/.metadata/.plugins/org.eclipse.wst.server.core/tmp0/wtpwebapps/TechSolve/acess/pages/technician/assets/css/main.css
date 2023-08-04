@@ -1,0 +1,129 @@
+@charset "UTF-8";
+
+body{
+	height:100%;
+}
+
+header{
+	background-color: black;
+	width: 100%;
+	color: white;
+	height: 10vh;
+	min-height: 35px;
+	flex: content;
+	border-bottom-left-radius: 3vh;
+	border-bottom-right-radius: 3vh;
+}
+
+header h1{
+	display: grid;
+	width: 12vw;
+	height: 10vh;
+	text-align: center;
+	margin: 0;
+	padding-left: 2vh;
+	align-content: center;
+	float: left;
+	text-shadow: blue 3px 3px 3px;
+}
+
+#section{
+	clear: both;	
+	display: block;
+	text-align: center;
+	overflow: auto;
+}
+
+header ul{
+	float: right;
+	margin: 0;
+	padding: 0;
+}
+
+header li{
+	width: 12vw;
+	list-style: none;
+	text-align: center;
+	align-content: center;
+	height: 10vh;
+	display: grid;
+	font-style: oblique;
+	font-family: fantasy;
+	float: right;
+}
+
+header li a{
+	text-decoration: none;
+	color: white;
+	text-shadow: none;
+	font-size: 2.5vh;
+}
+
+header li a:hover{
+	text-decoration: none;
+	color: white;
+	text-shadow: blue 2px 2px;
+	font-size: 3vh;
+}
+
+.subnav{
+	text-align: center;
+	width: auto;
+	display: grid;
+	margin-top: 15px;
+	padding: 0;
+}
+
+.subnav li{
+	list-style: none;
+	height: 8vh;
+}
+
+.subnav li a{
+	padding: 10px;
+	text-decoration: none;
+	font-style: oblique;
+	font-family: fantasy;
+	color: #fff;
+	font-size: 100%;
+	background-color: #000;
+	border: 2px solid #000;
+	width: 500px;
+	border-radius: 1vh;
+	vertical-align: middle;
+}
+
+.subnav li a:hover{
+	font-size: 110%;
+	text-shadow: 2px 2px blue;
+}
+
+#content{
+	width: 98.79vw;
+	clear: both;
+}
+
+form{
+	display: flex;
+    align-content: normal;
+    align-items: stretch;
+    justify-content: space-around;
+}
+
+table{
+	box-shadow: -10px 15px 25px 3px darkgrey;
+}
+
+td, tr{
+	text-align: center;
+	align-items: center;
+}
+
+.form-control{
+	display:inline;
+}
+
+.iconaction{
+	width: 2vw;
+	height: 2vw;
+}

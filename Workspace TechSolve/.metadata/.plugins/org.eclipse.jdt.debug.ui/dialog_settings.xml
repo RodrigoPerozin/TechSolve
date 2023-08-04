@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="expressionHistory">
+		<item key="expressionHistoryEntry_0" value="6fd742a61bd034804c00c49b18045020&#x0D;&#x0A;4b66350ba058270e09d1d7d5484e082d"/>
+		<item key="expressionHistoryEntryCount" value="2"/>
+		<item key="expressionHistoryEntry_1" value="com.mysql.cj.jdbc.ClientPreparedStatement: insertCliente(&apos;David Lacerda&apos;, 47996033741, 23467325678, &apos;davidLacer@gmail.com&apos;, &apos;2022-10-5&apos;)"/>
+	</section>
+	<section name="org.eclipse.jdt.internal.debug.ui.ExpressionInformationControlCreator$ExpressionInformationControl">
+		<item key="WIDTH" value="614"/>
+		<item key="HEIGHT" value="355"/>
+		<item key="SashWeightTree" value="446"/>
+		<item key="SashWeightDetails" value="553"/>
+	</section>
+</section>

@@ -1,0 +1,305 @@
+@charset "UTF-8";
+
+.orderBox{
+	
+	margin-top: 16px;
+	margin-bottom: 16px;
+	width: 40vw;
+	padding: 8px;
+	min-height: fit-content;
+	height: auto;
+	overflow-wrap: anywhere;
+	border: solid 2px yellow;
+	box-shadow: 10px 15px 25px 3px darkgrey;
+	display: flex;
+	justify-content: center;
+    align-self: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.orderBox.yellow{
+	background-color: #232323;
+	border: solid 2px yellow;
+	color: white;
+}
+
+.orderBox.blue{
+	background-color: #232323;
+	border: solid 2px blue;
+	color: white;
+}
+
+.orderBox.red{
+	background-color: #232323;
+	border: solid 2px red;
+	color: white;
+}
+
+.orderBox.orange{
+	background-color: #232323;
+	border: solid 2px orange;
+	color: white;
+}
+
+.orderBox.purple{
+	background-color: #232323;
+	border: solid 2px purple;
+	color: white;
+}
+
+.orderBox.green{
+	background-color: #232323;
+	border: solid 2px green;
+	color: white;
+}
+
+.orderBox.pink{
+	background-color: #232323;
+	border: solid 2px rgb(255, 128, 192);
+	color: white;
+}
+
+.orderBox.yellow:hover, 
+.orderBox.blue:hover, 
+.orderBox.red:hover, 
+.orderBox.orange:hover,
+.orderBox.purple:hover,
+.orderBox.green:hover,
+.orderBox.pink:hover{
+	background-color: #353535;
+}
+
+.orderBox h5{
+	margin: 0;
+	font-size: inherit;
+	line-height: normal;
+}
+
+.orderBox p{
+	color: #cdcdcd;
+	margin-bottom: 0;
+}
+
+.orderBox.yellow span{
+	background-color: rgb(95, 105, 50);
+	border-radius: 3px;
+	white-space: nowrap;
+}
+
+.orderBox.blue span{
+	background-color: #060165;
+	border-radius: 3px;
+	white-space: nowrap;
+}
+
+.orderBox.red span{
+	background-color: #6c0003;
+	border-radius: 3px;
+	white-space: nowrap;
+}
+
+.orderBox.orange span{
+	background-color: #7c3e00;
+	border-radius: 3px;
+	white-space: nowrap;
+}
+
+.orderBox.purple span{
+	background-color: #650b6c;
+	border-radius: 3px;
+	white-space: nowrap;
+}
+
+.orderBox.green span{
+	background-color: #057a09;
+	border-radius: 3px;
+	white-space: nowrap;
+}
+
+.orderBox.pink span{
+	background-color: #b700b7;
+	border-radius: 3px;
+	white-space: nowrap;
+}
+
+.orderbox span{
+	padding: 3px;
+}
+
+.treeDot{
+	width: 15px;
+	overflow-wrap: normal;
+	text-align: initial;
+	-webkit-writing-mode: vertical-lr;
+	font-size: xx-large;
+}
+
+a.options.yellow{
+	color: #e3dc12;
+    height: 25px;
+    text-decoration: none;
+}
+
+a.options.blue{
+	color: #1d12e2;
+    height: 25px;
+    text-decoration: none;
+}
+
+a.options.red{
+	color: #ff040b;
+    height: 25px;
+    text-decoration: none;
+}
+
+a.options.orange{
+	color: #dd6f00;
+    height: 25px;
+    text-decoration: none;
+}
+
+a.options.purple{
+	color: #93139d;
+    height: 25px;
+    text-decoration: none;
+}
+
+a.options.green{
+	color: #00ff40;
+    height: 25px;
+    text-decoration: none;
+}
+
+a.options.pink{
+	color: #ef0bf4;
+    height: 25px;
+    text-decoration: none;
+}
+
+.div-options-floating.yellow{
+	width: auto;
+    height: auto;
+    background-color: #2a2a2a;
+    position: absolute;
+    margin-top: -20px;
+    border: 1px solid yellow;
+    border-radius: 8px;
+    display: none;
+}
+
+.div-options-floating.blue{
+	width: auto;
+    height: auto;
+    background-color: #2a2a2a;
+    position: absolute;
+    margin-top: -20px;
+    border: 1px solid blue;
+    border-radius: 8px;
+    display: none;
+}
+
+.div-options-floating.red{
+	width: auto;
+    height: auto;
+    background-color: #2a2a2a;
+    position: absolute;
+    margin-top: -20px;
+    border: 1px solid red;
+    border-radius: 8px;
+    display: none;
+}
+
+.div-options-floating.orange{
+	width: auto;
+    height: auto;
+    background-color: #2a2a2a;
+    position: absolute;
+    margin-top: -20px;
+    border: 1px solid orange;
+    border-radius: 8px;
+    display: none;
+}
+
+.div-options-floating.purple{
+	width: auto;
+    height: auto;
+    background-color: #2a2a2a;
+    position: absolute;
+    margin-top: -20px;
+    border: 1px solid purple;
+    border-radius: 8px;
+    display: none;
+}
+
+.div-options-floating.green{
+	width: auto;
+    height: auto;
+    background-color: #2a2a2a;
+    position: absolute;
+    margin-top: -20px;
+    border: 1px solid green;
+    border-radius: 8px;
+    display: none;
+}
+
+.div-options-floating.pink{
+	width: auto;
+    height: auto;
+    background-color: #2a2a2a;
+    position: absolute;
+    margin-top: -20px;
+    border: 1px solid pink;
+    border-radius: 8px;
+    display: none;
+}
+
+.btn.opt-floating{
+	color: #d2d2d2;
+}
+
+.persist-sizeBox{
+	width: 100%;
+	font-size: 1.3vw;
+}
+
+.inpt-btn-box{
+    font-size: 2.3vh;
+    text-align: center;
+    width: fit-content;
+    margin-right: 6px;
+    height: 3vw;
+    padding: 0.2vw;
+    max-height: 5vh;
+}
+
+.btn.btn-secondary.inpt-btn-box.reviewAndBudgetOS{
+	background-color: #ca6500;
+	border-color: #000000;
+}
+
+.btn.btn-secondary.inpt-btn-box.startManutOS{
+	background-color: #00ff00;
+	border-color: #000000;
+}
+
+.icon-gear{
+	height: 4vh;
+    margin-top: -6px;
+    animation: maintenance infinite;
+    animation-duration: 3s;
+    animation-direction: normal;
+}
+
+@keyframes maintenance {
+	0% {
+		transform: rotate(0);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+#inptInfoNewProblem{
+	min-height: 180px;
+}

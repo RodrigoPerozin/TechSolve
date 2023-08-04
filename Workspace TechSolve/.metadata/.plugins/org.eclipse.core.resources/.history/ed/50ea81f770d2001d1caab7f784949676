@@ -1,0 +1,673 @@
+package br.com.techsolve.jdbc;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gson.JsonObject;
+
+import br.com.techsolve.modelo.Client;
+import br.com.techsolve.modelo.Order;
+import br.com.techsolve.modelo.Statuses;
+
+public class JDBCOrderDAO {
+
+	private Connection conn;
+	private Statuses statuses = new Statuses();
+	
+	public JDBCOrderDAO(Connection conn) {
+		
+		this.conn = conn;
+		
+	}
+
+	public int create(Order order) {
+		
+		try {
+		
+			PreparedStatement psCreate;
+			boolean colorIsPresent = false;
+			String sqlCreate = "INSERT INTO ordens_de_servico ("
+					+ "idcliente, "
+					+ "data_criacao, "
+					+ "status, "
+					+ "descricao_problema, "
+					+ "imei_aparelho, "
+					+ "modelo_aparelho, "
+					+ "novo_problema, "
+					+ "idatendente_responsavel";
+			
+			if(!order.getColor().isBlank()) {
+				sqlCreate += ", cor_aparelho";
+				colorIsPresent = true;
+				sqlCreate += ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			}else {
+				sqlCreate += ") VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+			}
+			
+			psCreate = conn.prepareStatement(sqlCreate);
+			psCreate.setInt(1, order.getClientId());
+			psCreate.setString(2, order.getCreationDate());
+			psCreate.setInt(3, 0);
+			psCreate.setString(4, order.getProblemDesc());
+			psCreate.setString(5, order.getImei());
+			psCreate.setString(6, order.getModel());
+			psCreate.setShort(7, order.getNewProblem());
+			psCreate.setInt(8, order.getAttendantRespId());
+			if(colorIsPresent) {
+				psCreate.setString(9, order.getColor());
+			}
+			
+			psCreate.execute();
+			return 1;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 2;
+		}
+		
+	}
+	
+	public List<JsonObject>  getAllMyOrders(int userId){
+		
+		List<JsonObject> listOrders = new ArrayList<JsonObject>();
+		String sqlQuery="";
+		String sqlQueryVerify="";
+		
+		sqlQuery = "SELECT * FROM ordens_de_servico where idtecnico_responsavel = " + userId + " LIMIT 10";
+		
+		PreparedStatement ps;
+		
+		ResultSet result;
+		JsonObject order = null;
+		
+		try {
+				
+			ps = conn.prepareStatement(sqlQuery);
+			result = ps.executeQuery();
+				
+			while(result.next()) {
+				
+				int orderId = result.getInt("idordem_servico");
+				int statusOS = result.getInt("status");
+				String creationDate = result.getString("data_criacao");
+				String finishDate = result.getString("data_termino");
+				int clientId = result.getInt("idcliente");
+				int attendantRespId = result.getInt("idatendente_responsavel");
+				int technicianRespId = result.getInt("idtecnico_responsavel");
+				String budget = result.getString("orcamento");
+				double totalPrice = result.getInt("valor_total");
+				String problemDesc = result.getString("descricao_problema");
+				String imei = result.getString("imei_aparelho");
+				String model = result.getString("modelo_aparelho");
+				String color = result.getString("cor_aparelho");
+				short newProblem = result.getShort("novo_problema");
+				String cancelReason = result.getString("motivo_cancelamento");
+				String justTransResp = result.getString("just_transf_resp");
+				String infoNewProblem = result.getString("info_novo_problema");
+				
+				order = new JsonObject();
+				order.addProperty("idordem_servico", orderId);
+				order.addProperty("status", statusOS);
+				order.addProperty("data_criacao", creationDate);
+				order.addProperty("data_termino", finishDate);
+				order.addProperty("idcliente", clientId);
+				order.addProperty("idatendente_responsavel", attendantRespId);
+				order.addProperty("idtecnico_responsavel", technicianRespId);
+				order.addProperty("orcamento", budget);
+				order.addProperty("valor_total", totalPrice);
+				order.addProperty("descricao_problema", problemDesc);
+				order.addProperty("imei_aparelho", imei);
+				order.addProperty("modelo_aparelho", model);
+				order.addProperty("cor_aparelho", color);
+				order.addProperty("novo_problema", newProblem);
+				order.addProperty("motivo_cancelamento", cancelReason);
+				order.addProperty("just_transf_resp", justTransResp);
+				order.addProperty("info_novo_problema", infoNewProblem);
+				
+				
+				listOrders.add(order);
+				
+			}
+				
+		}catch(Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+		return listOrders;
+			
+	}
+	
+
+	public List<JsonObject> getAll(int idUser, int permId) {
+		
+		List<JsonObject> listOrders = new ArrayList<JsonObject>();
+		String sqlQuery="";
+		
+		if(permId == 1 || permId == 2) { //atendente ou gerente
+			sqlQuery = "SELECT * FROM ordens_de_servico LIMIT 10";
+		}else { //tecnico
+			sqlQuery = "SELECT * FROM ordens_de_servico where status = "+ statuses.CREATED +" AND idtecnico_responsavel IS NULL LIMIT 10";
+		}
+		
+		
+		PreparedStatement ps;
+		
+		ResultSet result;
+		JsonObject order = null;
+		
+			try {
+				
+				ps = conn.prepareStatement(sqlQuery);
+				result = ps.executeQuery();
+				
+				while(result.next()) {
+					
+					int orderId = result.getInt("idordem_servico");
+					int statusOS = result.getInt("status");
+					String creationDate = result.getString("data_criacao");
+					String finishDate = result.getString("data_termino");
+					int clientId = result.getInt("idcliente");
+					int attendantRespId = result.getInt("idatendente_responsavel");
+					int technicianRespId = result.getInt("idtecnico_responsavel");
+					String budget = result.getString("orcamento");
+					double totalPrice = result.getInt("valor_total");
+					String problemDesc = result.getString("descricao_problema");
+					String imei = result.getString("imei_aparelho");
+					String model = result.getString("modelo_aparelho");
+					String color = result.getString("cor_aparelho");
+					short newProblem = result.getShort("novo_problema");
+					String cancelReason = result.getString("motivo_cancelamento");
+					String justTransResp = result.getString("just_transf_resp");
+					String infoNewProblem = result.getString("info_novo_problema");
+					
+					order = new JsonObject();
+					order.addProperty("idordem_servico", orderId);
+					order.addProperty("status", statusOS);
+					order.addProperty("data_criacao", creationDate);
+					order.addProperty("data_termino", finishDate);
+					order.addProperty("idcliente", clientId);
+					order.addProperty("idatendente_responsavel", attendantRespId);
+					order.addProperty("idtecnico_responsavel", technicianRespId);
+					order.addProperty("orcamento", budget);
+					order.addProperty("valor_total", totalPrice);
+					order.addProperty("descricao_problema", problemDesc);
+					order.addProperty("imei_aparelho", imei);
+					order.addProperty("modelo_aparelho", model);
+					order.addProperty("cor_aparelho", color);
+					order.addProperty("novo_problema", newProblem);
+					order.addProperty("motivo_cancelamento", cancelReason);
+					order.addProperty("just_transf_resp", justTransResp);
+					order.addProperty("info_novo_problema", infoNewProblem);
+					
+					
+					listOrders.add(order);
+					
+				}
+				
+			}catch(Exception e) {
+				e.printStackTrace();
+			}				
+		
+		return listOrders;
+		
+	}
+
+	private boolean getIsTaskValid(int countTakenTasks, int countAssmntTask, int countMaintTask) {
+		boolean isValid=false;
+		
+		if((countTakenTasks <= 30) && (countAssmntTask<=5) && (countMaintTask<=3)) {
+			isValid = true;
+		}
+		
+		return isValid;
+	}
+
+	public Order getbyid(int idOS) {
+		
+		String command = "SELECT * FROM ordens_de_servico WHERE idordem_servico = ?";
+		Order order = new Order();
+		
+		try {
+			PreparedStatement p = this.conn.prepareStatement(command);
+			p.setInt(1, idOS);
+			ResultSet rs = p.executeQuery();
+			while(rs.next()) {
+				
+				int orderId = rs.getInt("idordem_servico");
+				int statusOS = rs.getInt("status");
+				String creationDate = rs.getString("data_criacao");
+				String finishDate = rs.getString("data_termino");
+				int clientId = rs.getInt("idcliente");
+				int attendantRespId = rs.getInt("idatendente_responsavel");
+				int technicianRespId = rs.getInt("idtecnico_responsavel");
+				String budget = rs.getString("orcamento");
+				double totalPrice = rs.getInt("valor_total");
+				String problemDesc = rs.getString("descricao_problema");
+				String imei = rs.getString("imei_aparelho");
+				String model = rs.getString("modelo_aparelho");
+				String color = rs.getString("cor_aparelho");
+				short newProblem = rs.getShort("novo_problema");
+				String cancelReason = rs.getString("motivo_cancelamento");
+				String justTransResp = rs.getString("just_transf_resp");
+				String infoNewProblem = rs.getString("info_novo_problema");
+				
+				
+				order.setOrderId(orderId);
+				order.setStatusOS(statusOS);
+				order.setCreationDate(creationDate);
+				order.setFinishDate(finishDate);
+				order.setClientId(clientId);
+				order.setAttendantRespId(attendantRespId);
+				order.setTechnicianRespId(technicianRespId);
+				order.setBudget(budget);
+				order.setTotalPrice(totalPrice);
+				order.setProblemDesc(problemDesc);
+				order.setImei(imei);
+				order.setModel(model);
+				order.setColor(color);
+				order.setNewProblem(newProblem);
+				order.setJustTransResp(justTransResp);
+				order.setInfoNewProblem(infoNewProblem);
+				
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return order;
+	}
+
+	public boolean cancel(int idOS, String justCancelarOS) {
+
+		String command = "UPDATE ordens_de_servico SET motivo_cancelamento = ?, status = "+ statuses.CANCELED +" WHERE idordem_servico = ?";
+		
+		try {
+			PreparedStatement p = this.conn.prepareStatement(command);
+			p.setString(1, justCancelarOS);
+			p.setInt(2, idOS);
+			p.execute();
+			return true;
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+
+		return false;
+	}
+
+	public boolean setTec(int idOS, int idTec, String justTransfOS) {
+		
+		String command = "UPDATE ordens_de_servico SET idtecnico_responsavel = ?, just_transf_resp = ? WHERE idordem_servico = ?";
+		String command2 = "UPDATE ordens_de_servico SET idtecnico_responsavel = ?, just_transf_resp = ?, status = 1 WHERE idordem_servico = ?";
+		String getTecOS = "SELECT * FROM ordens_de_servico where idtecnico_responsavel = ?";
+		boolean isValid = false;
+		int statusOSTarget=-1;
+		
+		try {
+			
+			ResultSet rsVeStatusNow;
+			
+			PreparedStatement pVeStatusNow = this.conn.prepareStatement("SELECT * FROM ordens_de_servico where idordem_servico = ?");
+			pVeStatusNow.setInt(1, idOS);
+			rsVeStatusNow = pVeStatusNow.executeQuery();
+			
+			while(rsVeStatusNow.next()) {
+				
+				statusOSTarget = rsVeStatusNow.getInt("status");
+				
+			}
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			
+			ResultSet rsVe;
+			
+			PreparedStatement pVe = this.conn.prepareStatement(getTecOS);
+			pVe.setInt(1, idTec);
+			rsVe = pVe.executeQuery();
+			
+			int countTakenTasks=0;
+			int countAssmntTask=0;
+			int countMaintTask = 0;
+			
+			while(rsVe.next()) {
+				int statusOS = rsVe.getInt("status");
+				
+				if(statusOS==1) { //ASSUMIDA
+					countTakenTasks++;
+				}else if(statusOS==2) { //EM AVALIAÇÃO
+					countAssmntTask++;
+				}else if(statusOS==4) { //EM MANUTENÇÃO
+					countMaintTask++;
+				}
+				
+			}
+			
+			isValid = getIsTaskValid(countTakenTasks, countAssmntTask, countMaintTask);
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		if(isValid && statusOSTarget>0) {
+			
+			try {
+				PreparedStatement p = this.conn.prepareStatement(command);
+				p.setInt(1, idTec);
+				p.setString(2, justTransfOS);
+				p.setInt(3, idOS);
+				p.execute();
+				
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+			return true;
+			
+		}else if(isValid && statusOSTarget==0){
+			try {
+				PreparedStatement p = this.conn.prepareStatement(command2);
+				p.setInt(1, idTec);
+				p.setString(2, justTransfOS);
+				p.setInt(3, idOS);
+				p.execute();
+				
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+			return true;
+		}else {
+			return false;
+		}
+		
+	}
+
+	public int takeOS(int idOS, int idUser, int idPerm) {
+		
+		try {
+			
+			String sqlTakeOS = "UPDATE ordens_de_servico SET idtecnico_responsavel= ?, status= ? WHERE idordem_servico= ? AND idtecnico_responsavel IS NULL";
+			String getTecOS = "SELECT * FROM ordens_de_servico where idtecnico_responsavel = ?";
+			
+			PreparedStatement pV = this.conn.prepareStatement(getTecOS);
+			pV.setInt(1, idUser);
+			ResultSet resultVerificationTecOS = pV.executeQuery();
+			
+			int countTakenTasks=0;
+			int countAssmntTask=0;
+			int countMaintTask = 0;
+			boolean isValid = false;
+			
+			while(resultVerificationTecOS.next()) {
+				
+				int statusOS = resultVerificationTecOS.getInt("status");
+				
+				if(statusOS==1) { //ASSUMIDA
+					countTakenTasks++;
+				}else if(statusOS==2) { //EM AVALIAÇÃO
+					countAssmntTask++;
+				}else if(statusOS==4) { //EM MANUTENÇÃO
+					countMaintTask++;
+				}
+			
+			}
+			
+			isValid = getIsTaskValid(countTakenTasks, countAssmntTask, countMaintTask);
+			
+			if(isValid) {
+				
+				PreparedStatement p2 = this.conn.prepareStatement(sqlTakeOS);
+				p2.setInt(1, idUser);
+				p2.setInt(2, statuses.TAKEN);
+				p2.setInt(3, idOS);
+				p2.execute();
+				
+				return 1;
+				
+			}else{
+				return 2;
+			}
+			
+			
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return 0;
+	}
+
+	public int returnOS(int idOS) {
+		
+		String command1 = "UPDATE ordens_de_servico SET status = " + statuses.CREATED + ", idtecnico_responsavel = NULL, just_transf_resp = NULL WHERE idordem_servico = ? AND status = ?";
+		
+		try {
+			
+			PreparedStatement p1 = this.conn.prepareStatement(command1);
+			p1.setInt(1, idOS);
+			p1.setInt(2, statuses.TAKEN);
+			p1.execute();
+			
+			return 1;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 2;
+		}
+		
+	}
+
+	public int setReviewAndBudgetOS(int idOS) {
+		
+		String command1 = "UPDATE ordens_de_servico SET status = " + statuses.IN_REVIEW_BUDGET + " WHERE idordem_servico = ?";
+		
+		try {
+			
+			PreparedStatement p1 = this.conn.prepareStatement(command1);
+			p1.setInt(1, idOS);
+			p1.execute();
+			
+			return 1;
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+			return 2;
+		}
+		
+	}
+
+	public int doReviewAndBudgetOS(Order order) {
+		
+		try {
+			
+			String command1 = "UPDATE ordens_de_servico SET status = " + statuses.IN_BUDGET_APR + ", orcamento = ?, valor_total = ? WHERE idordem_servico = ?";
+			
+			PreparedStatement p1 = this.conn.prepareStatement(command1);
+			p1.setString(1, order.getBudget());
+			p1.setDouble(2, order.getTotalPrice());
+			p1.setInt(3, order.getOrderId());
+			p1.execute();
+			
+			return 1;
+		}catch(Exception e) {
+			e.printStackTrace();
+			return 2;
+		}
+		
+	}
+
+	public int reproveBudget(int idOS) {
+		
+		try {
+			
+			String command1 = "UPDATE ordens_de_servico SET status = " + statuses.BUDGET_REP + " WHERE idordem_servico = ?";
+			
+			PreparedStatement p1 = this.conn.prepareStatement(command1);
+			p1.setInt(1, idOS);
+			p1.execute();
+			
+			return 1;
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+			return 2;
+		}
+		
+	}
+	
+	public int approveBudget(int idOS) {
+		
+		try {
+			
+			String command1 = "UPDATE ordens_de_servico SET status = " + statuses.BUDGET_APR + " WHERE idordem_servico = ?";
+			
+			PreparedStatement p1 = this.conn.prepareStatement(command1);
+			p1.setInt(1, idOS);
+			p1.execute();
+			
+			return 1;
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+			return 2;
+		}
+		
+	}
+
+	public int doMaintenance(int idOS) {
+		
+		try {
+			
+			String command1 = "UPDATE ordens_de_servico SET status = " + statuses.IN_MAINTENANCE + " WHERE idordem_servico = ?";
+			
+			PreparedStatement p1 = this.conn.prepareStatement(command1);
+			p1.setInt(1, idOS);
+			p1.execute();
+			
+			return 1;
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+			return 2;
+		}
+		
+	}
+
+	public int doInfoNewProblemAndBudget(Order order) {
+		
+		//infonovoproblema
+		//orçamentoatualizado
+		//valortotalatualizado
+			
+		try {
+			
+			String command1 = "UPDATE ordens_de_servico SET "
+								+"orcamento = ?, "
+								+"valor_total = ?, "
+								+"info_novo_problema = ?, "
+								+"status = ? "
+								+"WHERE idordem_servico = ?";
+			
+			PreparedStatement p1 = this.conn.prepareStatement(command1);
+			p1.setString(1, order.getBudget());
+			p1.setDouble(2, order.getTotalPrice());
+			p1.setString(3, order.getInfoNewProblem());
+			p1.setInt(4, statuses.IN_NEW_PROBLEM);
+			p1.setInt(5, order.getOrderId());
+			p1.execute();
+			
+			return 1;
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+			return 2;
+		}
+		
+	}
+
+	public int approveNewBudget(int idOS) {
+		
+		try {
+			
+			String command1 = "UPDATE ordens_de_servico SET status = " + statuses.NEW_PROBLEM_APR + " WHERE idordem_servico = ?";
+			
+			PreparedStatement p1 = this.conn.prepareStatement(command1);
+			p1.setInt(1, idOS);
+			p1.execute();
+			
+			return 1;
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+			return 2;
+		}
+		
+	}
+
+	public int reproveNewBudget(int idOS) {
+		
+		try {
+			
+			String command1 = "UPDATE ordens_de_servico SET status = " + statuses.NEW_PROBLEM_REP + " WHERE idordem_servico = ?";
+			
+			PreparedStatement p1 = this.conn.prepareStatement(command1);
+			p1.setInt(1, idOS);
+			p1.execute();
+			
+			return 1;
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+			return 2;
+		}
+		
+	}
+
+	public int finishMaintenance(int idOS) {
+		
+		try {
+			
+			String command1 = "UPDATE ordens_de_servico SET status = " + statuses.END_MAINTENANCE + " WHERE idordem_servico = ?";
+			
+			PreparedStatement p1 = this.conn.prepareStatement(command1);
+			p1.setInt(1, idOS);
+			p1.execute();
+			
+			return 1;
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+			return 2;
+		}
+		
+	}
+
+	public int doPayment(int idOS) {
+		
+		try {
+			
+			String command1 = "UPDATE ordens_de_servico SET status = " + statuses.END_MAINTENANCE + " WHERE idordem_servico = ?";
+			
+			PreparedStatement p1 = this.conn.prepareStatement(command1);
+			p1.setInt(1, idOS);
+			p1.execute();
+			
+			return 1;
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+			return 2;
+		}
+		
+	}
+
+	
+	
+}

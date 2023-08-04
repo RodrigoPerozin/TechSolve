@@ -1,0 +1,47 @@
+<meta charset="UTF-8">
+<h1>Criar nova O.S.</h1><br>
+<form name="frmRegister" id="frmRegister">
+	<fieldset id="fieldsetRegister">
+		<table id="tableRegister" class="newosTable">
+			<tbody class="newos-tbody">
+				<tr>				
+					<td><label for="client"><p>Cliente:</p></label></td>
+					<td class="tdSelectClient">
+						<select oninput="verifyFormOk()" class="form-control selectClient" type="select" name="client" id="client" required>
+							<option value="">Carregando clientes...</option>
+						</select>
+						<input class="form-control" id="filtroCliente" type="text" placeholder="Filtre aqui">
+						<button type="button" onclick="TECHSOLVE.client.filterClientSelect()" class="btn" id="btn-search-client"></button>
+					</td>
+				</tr>
+				<tr>
+					<td><label for="imei"><p>IMEI do aparelho:</p></label></td>
+					<td><input oninput="verifyFormOk()" class="form-control" type="number" name="imei" id="imei" placeholder="000000000000000" required></td>
+				</tr>
+				<tr>
+					<td><label for="model"><p>Modelo do aparelho:</p></label></td>
+					<td><input maxlength="45" oninput="verifyFormOk()" class="form-control" type="text" name="model" id="model" placeholder="TechPhone X1" required></td>
+				</tr>
+				<tr>
+					<td><label for="color"><p>Cor do aparelho:</p></label></td>
+					<td><input maxlength="45" class="form-control"type="text" name="color" id="color" placeholder="Branco" required></td>
+				</tr>
+				<tr>
+					<td class="tdTextArea"><label for="problemdesc"><p>Descrição do problema:</p></label></td>
+					<td>
+						<textarea oninput="verifyFormOk()" class="form-control textarea" name="problemdesc" id="problemdesc" placeholder="Descreva brevemente o problema..." required></textarea>
+					</td>
+				</tr>
+				<tr class="btn-tr-newos">
+					<td spancol=2>
+					<input type="reset" id="resetBtn" onmouseout="verifyFormOk()" class="btn btn-primary mb-3" value="Limpar">&nbsp;
+					<input type="button" class="btn btn-secondary mb-3" name="submitRegister" onclick="TECHSOLVE.order.register()" id="submitRegister" value="Registrar" disabled><br>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</fieldset>
+</form>
+<script>
+	verifyFormOk();
+</script>

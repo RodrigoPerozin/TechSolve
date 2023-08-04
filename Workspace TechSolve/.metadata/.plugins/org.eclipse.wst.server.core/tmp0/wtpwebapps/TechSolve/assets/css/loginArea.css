@@ -1,0 +1,56 @@
+@charset "UTF-8";
+
+body{
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+}
+
+.frmLogin .form-control{
+	width: 30vw;
+}
+
+.frmLogin .form-text.text-muted{
+	font-size:12px;
+}
+
+.frmLogin label{
+	font-family: 'Lato', sans-serif;
+	font-weight: 600;
+}
+
+.frmLogin label, .frmLogin small{
+	margin-left: 5px;
+}
+
+.frmLogin label{
+	margin-top: 10px;
+}
+
+#submit{
+	margin-top: 10px;
+}
+
+.btn.btn-primary{
+	width: 12vw;
+}
+
+h1{
+	text-align: center;
+}
+
+section{
+	width: 35vw;
+	align-self: center;
+	padding: 10px;
+	border-style: solid;
+    border-color: transparent;
+    border-width: 1px;
+    box-shadow: -10px 15px 25px 3px darkgrey;
+}
+
+.frmLogin{
+	text-align: -webkit-center;
+    display: block;
+}
