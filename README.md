@@ -22,4 +22,7 @@ A system for a fictitious electronics repair company
   <li>Set instance user and password to "root"</li>
   <li>Enter on the instance management, open the file db_techsolve.sql</li>
   <li>Run all the SQL commands and you will see the database created</li>
+  <li>Open the Workspace TechSolve on Eclipse IDE</li>
+  <li>Run the TechSolve on Tomcat 7 Server</li>
+  <li>Acess the URL localhost:8080/TechSolve/</li>
 </ol>
